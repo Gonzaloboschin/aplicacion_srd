@@ -1,0 +1,6 @@
+{
+    "carlos": { "password": "admin123", "role": "admin" },
+    "daniel": { "password": "oper123", "role": "operario" },
+    "gonza": { "password": "devpass", "role": "dev" }
+  }
+  
