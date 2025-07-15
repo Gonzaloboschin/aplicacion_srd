@@ -2,7 +2,8 @@
 
 import tkinter as tk
 from tkinter import ttk, messagebox
-from ui.revision_operario_ui import abrir_revision_operario
+from ui.menu_operario import menu_operario 
+
 
 EMPRESAS = ["Villa Atuel S.A", "La Española S.A", "Sunny S.A"] # DESPUES USAR BBDD
 
@@ -21,7 +22,7 @@ def abrir_interfaz_operario(nombre_usuario):
         ventana.destroy()
 
         # Abrimos la nueva interfaz
-        abrir_revision_operario(nombre_usuario, empresa)
+        menu_operario(nombre_usuario, empresa, lambda: abrir_interfaz_operario(nombre_usuario))
 
 
     # Crear ventana principal

@@ -1,16 +1,16 @@
-# ui/revision_operario_ui.py
+# ui/revision_final_ui.py
 
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import ttk, messagebox
 from ui.cargar_evento_ui import abrir_cargar_evento
 
 
-def abrir_revision_operario(nombre_usuario, empresa):
+def menu_operario(nombre_usuario, empresa, volver_func):
+
 
     def cargar_evento():
         ventana.destroy()
-        abrir_cargar_evento(nombre_usuario, lambda: abrir_revision_operario(nombre_usuario, empresa))
-
+        abrir_cargar_evento(nombre_usuario, empresa, lambda: menu_operario(nombre_usuario, empresa, volver_func))
 
     def modificar_evento():
         messagebox.showinfo("Modificar evento", "Abrir pantalla de modificación de evento")
@@ -18,23 +18,22 @@ def abrir_revision_operario(nombre_usuario, empresa):
     def eliminar_evento():
         messagebox.showinfo("Eliminar evento", "Abrir pantalla de eliminación de evento")
 
-    def siguiente():
-        messagebox.showinfo("Siguiente", "Continuar flujo")
+    def salir():
+        messagebox.showinfo("Sesión finalizada", "La revisión fue completada. Volviendo al inicio.")
+        ventana.destroy()
+        volver_func()
 
     ventana = tk.Tk()
-    ventana.title("Revisión - Operario")
+    ventana.title("Revisión final de eventos modificados")
     ventana.geometry("500x400")
     ventana.configure(bg="#FFCC00")
 
-    # Usuario arriba a la derecha
     label_usuario = tk.Label(ventana, text=f"{nombre_usuario}\nOperador", bg="#FFCC00", font=("Arial", 10), anchor="e", justify="right")
     label_usuario.place(relx=0.98, rely=0.02, anchor="ne")
 
-    # Nombre de la empresa en negrita
     label_empresa = tk.Label(ventana, text=empresa.upper(), font=("Arial", 12, "bold"), bg="#FFCC00")
     label_empresa.place(relx=0.1, rely=0.25, anchor="w")
 
-    # Botones verticales
     btn_cargar = tk.Button(ventana, text="Cargar evento", width=25, command=cargar_evento)
     btn_cargar.place(relx=0.5, rely=0.4, anchor="center")
 
@@ -44,9 +43,11 @@ def abrir_revision_operario(nombre_usuario, empresa):
     btn_eliminar = tk.Button(ventana, text="Eliminar evento", width=25, command=eliminar_evento)
     btn_eliminar.place(relx=0.5, rely=0.6, anchor="center")
 
-    btn_siguiente = tk.Button(ventana, text="Siguiente", width=25, command=siguiente)
-    btn_siguiente.place(relx=0.5, rely=0.7, anchor="center")
+    # Frame y botón salir
+    frame_botones = tk.Frame(ventana, bg="#FFCC00")
+    frame_botones.place(relx=0.5, rely=0.75, anchor="center")
+
+    btn_salir = tk.Button(frame_botones, text="Salir", width=15, command=salir)
+    btn_salir.grid(row=0, column=0, padx=10)
 
     ventana.mainloop()
-
-

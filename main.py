@@ -3,6 +3,7 @@
 from auth.login_window import show_login
 from ui.operario_ui import abrir_interfaz_operario
 
+
 session = show_login()
 
 if session["username"]:

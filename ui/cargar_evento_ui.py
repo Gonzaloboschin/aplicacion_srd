@@ -1,7 +1,12 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
+from utils.eventos_storage import guardar_evento
+from ui.revision_final_ui import revision_final_operario
 
-def abrir_cargar_evento(nombre_usuario, empresa):
+
+
+def abrir_cargar_evento(nombre_usuario, empresa, volver_func):
+
     def cargar():
         estacion = entry_estacion.get()
         tipo = combo_tipo_evento.get()
@@ -11,19 +16,35 @@ def abrir_cargar_evento(nombre_usuario, empresa):
             messagebox.showwarning("Campos incompletos", "Por favor complete todos los campos.")
             return
 
-        # Simulación de inserción en base de datos
-        print(f"Evento cargado: Estación={estacion}, Tipo={tipo}, Obs={observacion}")
+        # Guardar evento en archivo JSON
+        guardar_evento(estacion, tipo, observacion)
+
+        messagebox.showinfo("Evento cargado", f"Evento guardado:\nEstación: {estacion}\nTipo: {tipo}\nObs: {observacion}")
 
         entry_estacion.delete(0, tk.END)
         combo_tipo_evento.set("")
         entry_observacion.delete(0, tk.END)
 
-    def finalizar():
-        ventana.destroy()
-
     def volver_atras():
         ventana.destroy()
+        volver_func()
 
+    def finalizar():
+        estacion = entry_estacion.get()
+        tipo = combo_tipo_evento.get()
+        observacion = entry_observacion.get()
+
+        if estacion or tipo or observacion:
+            if not estacion or not tipo or not observacion:
+                messagebox.showwarning("Campos incompletos", "Antes de finalizar, complete todos los campos o vacíelos.")
+                return
+
+            guardar_evento(estacion, tipo, observacion)
+            messagebox.showinfo("Evento guardado", "Tu evento fue guardado automáticamente antes de finalizar.")
+
+        ventana.destroy()
+        revision_final_operario(nombre_usuario, empresa, volver_func)
+        
     def mostrar_info(texto):
         info_label.config(text=texto)
 

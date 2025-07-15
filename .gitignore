@@ -1,0 +1,24 @@
+# Archivos de Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Entornos virtuales
+env/
+venv/
+.venv/
+
+# Archivos temporales de Office
+~$*
+
+# Archivos de presentación
+*.pptx
+
+# Config local del editor
+.vscode/
+.idea/
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
