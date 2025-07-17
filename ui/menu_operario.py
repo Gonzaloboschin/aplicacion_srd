@@ -3,19 +3,23 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 from ui.cargar_evento_ui import abrir_cargar_evento
+from ui.revision_final_ui import revision_final_operario
 
 
 def menu_operario(nombre_usuario, empresa, volver_func):
-
 
     def cargar_evento():
         ventana.destroy()
         abrir_cargar_evento(nombre_usuario, empresa, lambda: menu_operario(nombre_usuario, empresa, volver_func))
 
     def modificar_evento():
+        ventana.destroy()
+        revision_final_operario(nombre_usuario, empresa, volver_func)
         messagebox.showinfo("Modificar evento", "Abrir pantalla de modificación de evento")
 
     def eliminar_evento():
+        ventana.destroy()
+        revision_final_operario(nombre_usuario, empresa, volver_func)        
         messagebox.showinfo("Eliminar evento", "Abrir pantalla de eliminación de evento")
 
     def salir():

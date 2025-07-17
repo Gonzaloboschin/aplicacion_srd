@@ -19,7 +19,7 @@ def abrir_cargar_evento(nombre_usuario, empresa, volver_func):
         # Guardar evento en archivo JSON
         guardar_evento(estacion, tipo, observacion)
 
-        messagebox.showinfo("Evento cargado", f"Evento guardado:\nEstación: {estacion}\nTipo: {tipo}\nObs: {observacion}")
+        messagebox.showinfo("Evento cargado", f"Estación: {estacion}\nTipo: {tipo}\nObs: {observacion}")
 
         entry_estacion.delete(0, tk.END)
         combo_tipo_evento.set("")
