@@ -1,7 +1,8 @@
 [
     {
-        "numero": "asdvad",
-        "evento": "Seco",
-        "observacion": "asfba"
+        "numero": "111",
+        "tipo_estacion": "Cebadero Químico",
+        "tipo_evento": "Húmedo",
+        "observacion": "QWRGWRG"
     }
 ]

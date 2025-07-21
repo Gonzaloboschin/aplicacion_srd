@@ -4,8 +4,13 @@ import json
 
 FILENAME = "eventos_temp.json"
 
-def guardar_evento(numero, evento, observacion):
-    nuevo = {"numero": numero, "evento": evento, "observacion": observacion}
+def guardar_evento(numero, tipo_estacion, tipo_evento, observacion):
+    nuevo = {
+        "numero": numero,
+        "tipo_estacion": tipo_estacion,
+        "tipo_evento": tipo_evento,
+        "observacion": observacion
+    }
     try:
         with open(FILENAME, "r", encoding="utf-8") as f:
             eventos = json.load(f)
@@ -15,7 +20,7 @@ def guardar_evento(numero, evento, observacion):
     eventos.append(nuevo)
 
     with open(FILENAME, "w", encoding="utf-8") as f:
-        json.dump(eventos, f, indent=4)
+        json.dump(eventos, f, indent=4, ensure_ascii=False)
 
 def cargar_eventos():
     try:

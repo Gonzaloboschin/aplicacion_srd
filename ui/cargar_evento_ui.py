@@ -4,24 +4,25 @@ from utils.eventos_storage import guardar_evento
 from ui.revision_final_ui import revision_final_operario
 
 
-
 def abrir_cargar_evento(nombre_usuario, empresa, volver_func):
 
     def cargar():
-        estacion = entry_estacion.get()
-        tipo = combo_tipo_evento.get()
-        observacion = entry_observacion.get()
+        estacion = entry_estacion.get().strip()
+        tipo_estacion = combo_tipo_estacion.get().strip()
+        tipo_evento = combo_tipo_evento.get().strip()
+        observacion = entry_observacion.get().strip()
 
-        if not estacion or not tipo or not observacion:
+        if not estacion or not tipo_estacion or not tipo_evento or not observacion:
             messagebox.showwarning("Campos incompletos", "Por favor complete todos los campos.")
             return
 
         # Guardar evento en archivo JSON
-        guardar_evento(estacion, tipo, observacion)
+        guardar_evento(estacion, tipo_estacion, tipo_evento, observacion)
 
-        messagebox.showinfo("Evento cargado", f"Estación: {estacion}\nTipo: {tipo}\nObs: {observacion}")
+        messagebox.showinfo("Evento cargado", f"Estación: {estacion}\nTipo estación: {tipo_estacion}\nTipo evento: {tipo_evento}\nObs: {observacion}")
 
         entry_estacion.delete(0, tk.END)
+        combo_tipo_estacion.set("")
         combo_tipo_evento.set("")
         entry_observacion.delete(0, tk.END)
 
@@ -30,16 +31,17 @@ def abrir_cargar_evento(nombre_usuario, empresa, volver_func):
         volver_func()
 
     def finalizar():
-        estacion = entry_estacion.get()
-        tipo = combo_tipo_evento.get()
-        observacion = entry_observacion.get()
+        estacion = entry_estacion.get().strip()
+        tipo_estacion = combo_tipo_estacion.get().strip()
+        tipo_evento = combo_tipo_evento.get().strip()
+        observacion = entry_observacion.get().strip()
 
-        if estacion or tipo or observacion:
-            if not estacion or not tipo or not observacion:
+        if estacion or tipo_estacion or tipo_evento or observacion:
+            if not (estacion and tipo_estacion and tipo_evento and observacion):
                 messagebox.showwarning("Campos incompletos", "Antes de finalizar, complete todos los campos o vacíelos.")
                 return
 
-            guardar_evento(estacion, tipo, observacion)
+            guardar_evento(estacion, tipo_estacion + ' - ' + tipo_evento, observacion)
             messagebox.showinfo("Evento guardado", "Tu evento fue guardado automáticamente antes de finalizar.")
 
         ventana.destroy()
@@ -53,7 +55,7 @@ def abrir_cargar_evento(nombre_usuario, empresa, volver_func):
 
     ventana = tk.Tk()
     ventana.title("Cargar evento")
-    ventana.geometry("600x400")
+    ventana.geometry("600x450")
     ventana.configure(bg="#FFCC00")
 
     # === Usuario arriba a la derecha ===
@@ -62,9 +64,9 @@ def abrir_cargar_evento(nombre_usuario, empresa, volver_func):
 
     # === Frame central ===
     frame = tk.Frame(ventana, bg="#FFCC00")
-    frame.place(relx=0.5, rely=0.4, anchor="center")
+    frame.place(relx=0.5, rely=0.45, anchor="center")
 
-    label_titulo = tk.Label(frame, text="Cargar evento", font=("Arial", 12, "bold"), bg="#FFCC00")
+    label_titulo = tk.Label(frame, text="Registro de control", font=("Arial", 12, "bold"), bg="#FFCC00")
     label_titulo.grid(row=0, column=0, columnspan=2, pady=(0, 20))
 
     # === Campos de entrada ===
@@ -72,18 +74,23 @@ def abrir_cargar_evento(nombre_usuario, empresa, volver_func):
     entry_estacion = tk.Entry(frame, font=("Arial", 10))
     entry_estacion.grid(row=1, column=1, padx=5, pady=5)
 
-    tk.Label(frame, text="Tipo de evento", bg="#FFCC00", font=("Arial", 10)).grid(row=2, column=0, sticky="e", padx=5, pady=5)
-    combo_tipo_evento = ttk.Combobox(frame, values=["Seco", "Húmedo", "Mojado"], state="readonly", font=("Arial", 10))
-    combo_tipo_evento.grid(row=2, column=1, padx=5, pady=5)
+    # Nuevo: Tipo de estación
+    tk.Label(frame, text="Tipo de estación", bg="#FFCC00", font=("Arial", 10)).grid(row=2, column=0, sticky="e", padx=5, pady=5)
+    combo_tipo_estacion = ttk.Combobox(frame, values=["Trampa Jaulas", "Planchas Pegamentosas", "Cebadero Químico"], state="readonly", font=("Arial", 10))
+    combo_tipo_estacion.grid(row=2, column=1, padx=5, pady=5)
 
-    tk.Label(frame, text="Observación", bg="#FFCC00", font=("Arial", 10)).grid(row=3, column=0, sticky="e", padx=5, pady=5)
+    # Tipo de evento dinámico o fijo según lógica futura
+    tk.Label(frame, text="Tipo de evento", bg="#FFCC00", font=("Arial", 10)).grid(row=3, column=0, sticky="e", padx=5, pady=5)
+    combo_tipo_evento = ttk.Combobox(frame, values=["Seco", "Húmedo", "Mojado"], state="readonly", font=("Arial", 10))
+    combo_tipo_evento.grid(row=3, column=1, padx=5, pady=5)
+
+    tk.Label(frame, text="Observación", bg="#FFCC00", font=("Arial", 10)).grid(row=4, column=0, sticky="e", padx=5, pady=5)
     entry_observacion = tk.Entry(frame, font=("Arial", 10))
-    entry_observacion.grid(row=3, column=1, padx=5, pady=5)
+    entry_observacion.grid(row=4, column=1, padx=5, pady=5)
 
     # === Botones con eventos de hover ===
-    # === Botones alineados horizontalmente ===
     botones_frame = tk.Frame(frame, bg="#FFCC00")
-    botones_frame.grid(row=4, column=0, columnspan=2, pady=20)
+    botones_frame.grid(row=5, column=0, columnspan=2, pady=20)
 
     btn_atras = tk.Button(botones_frame, text="Atrás", width=10, command=volver_atras)
     btn_atras.grid(row=0, column=0, padx=10)
@@ -94,24 +101,14 @@ def abrir_cargar_evento(nombre_usuario, empresa, volver_func):
     btn_finalizar = tk.Button(botones_frame, text="Finalizar", width=10, command=finalizar)
     btn_finalizar.grid(row=0, column=2, padx=10)
 
-
     # === Label informativo inferior ===
     info_label = tk.Label(ventana, text="", bg="#FFCC00", font=("Arial", 9), wraplength=500, justify="center")
-    info_label.place(relx=0.5, rely=0.9, anchor="center")
+    info_label.place(relx=0.5, rely=0.92, anchor="center")
 
-    # === Asociar eventos hover a cada botón ===
-    btn_cargar.bind("<Enter>", lambda e: mostrar_info(
-        "Cuando se presiona 'Cargar', se agrega la modificación a la base de datos. "
-        "Los campos se limpian para agregar otro evento."
-    ))
-    btn_cargar.bind("<Leave>", limpiar_info)
-
-    btn_finalizar.bind("<Enter>", lambda e: mostrar_info(
-        "Si no hay más eventos que cargar, presione 'Finalizar' para volver a la pantalla anterior."
-    ))
-    btn_finalizar.bind("<Leave>", limpiar_info)
-
-    btn_atras.bind("<Enter>", lambda e: mostrar_info("Volver a la pantalla anterior sin guardar cambios."))
-    btn_atras.bind("<Leave>", limpiar_info)
+    for btn, txt in [(btn_cargar, "Cuando se presiona 'Cargar', se agrega la modificación..."),
+                     (btn_finalizar, "Si no hay más eventos que cargar..."),
+                     (btn_atras, "Volver a la pantalla anterior sin guardar...")]:
+        btn.bind("<Enter>", lambda e, t=txt: mostrar_info(t))
+        btn.bind("<Leave>", limpiar_info)
 
     ventana.mainloop()

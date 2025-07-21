@@ -1,14 +1,20 @@
-# ui/revision_final_ui.py
-
 import tkinter as tk
 from tkinter import ttk, messagebox
 import json
 from utils.eventos_storage import cargar_eventos, limpiar_eventos
 
+
 def revision_final_operario(nombre_usuario, empresa, volver_func):
-    eventos_modificados = cargar_eventos()
+    # Cargar eventos, cada evento debe incluir: numero, tipo_estacion, tipo_evento, observacion
+    eventos_data = cargar_eventos()
     eventos_modificados = [
-        (e["numero"], e["evento"], e["observacion"]) for e in eventos_modificados
+        (
+            e.get("numero", ""),
+            e.get("tipo_estacion", ""),
+            e.get("tipo_evento", ""),
+            e.get("observacion", "")
+        )
+        for e in eventos_data
     ]
 
     def modificar_celda(event):
@@ -26,7 +32,7 @@ def revision_final_operario(nombre_usuario, empresa, volver_func):
         entry.insert(0, valor_actual)
         entry.focus()
 
-        def guardar_edicion(event):
+        def guardar_edicion(evt):
             tree.set(fila_id, column=col_index, value=entry.get())
             entry.destroy()
 
@@ -45,27 +51,35 @@ def revision_final_operario(nombre_usuario, empresa, volver_func):
 
     ventana = tk.Tk()
     ventana.title("Revisión final de eventos")
-    ventana.geometry("700x400")
+    ventana.geometry("800x400")
     ventana.configure(bg="#FFCC00")
 
     # Encabezado
     tk.Label(ventana, text=empresa.upper(), font=("Arial", 14, "bold"), bg="#FFCC00").place(x=30, y=20)
-    tk.Label(ventana, text=f"{nombre_usuario}\nOperador", font=("Arial", 10), bg="#FFCC00", justify="right").place(x=580, y=20)
+    tk.Label(ventana, text=f"{nombre_usuario}\nOperador", font=("Arial", 10), bg="#FFCC00", justify="right").place(x=750, y=20)
 
     import datetime
     fecha = datetime.date.today().strftime("%d/%m/%Y")
     tk.Label(ventana, text=fecha, font=("Arial", 10), bg="#FFCC00").place(x=30, y=50)
 
-    # Tabla
-    tree = ttk.Treeview(ventana, columns=("numero", "evento", "observacion"), show="headings", height=8)
+    # Tabla con cuatro columnas: estación, tipo_estacion, tipo_evento, observacion
+    tree = ttk.Treeview(
+        ventana,
+        columns=("numero", "tipo_estacion", "tipo_evento", "observacion"),
+        show="headings",
+        height=8
+    )
     tree.heading("numero", text="Número de estación")
-    tree.heading("evento", text="Tipo de evento")
+    tree.heading("tipo_estacion", text="Tipo de estación")
+    tree.heading("tipo_evento", text="Tipo de evento")
     tree.heading("observacion", text="Observación")
-    tree.column("numero", width=150)
-    tree.column("evento", width=150)
-    tree.column("observacion", width=300)
-    tree.place(relx=0.5, rely=0.5, anchor="center")
+    tree.column("numero", width=120)
+    tree.column("tipo_estacion", width=150)
+    tree.column("tipo_evento", width=150)
+    tree.column("observacion", width=280)
+    tree.place(relx=0.5, rely=0.55, anchor="center")
 
+    # Insertar filas directamente sin división de cadenas
     for fila in eventos_modificados:
         tree.insert("", "end", values=fila)
 
