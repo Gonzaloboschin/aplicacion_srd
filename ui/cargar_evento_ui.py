@@ -2,6 +2,8 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 from utils.eventos_storage import guardar_evento
 from ui.revision_final_ui import revision_final_operario
+from utils.codigo_estaciones import obtener_tipo_estacion_por_codigo
+
 
 
 def abrir_cargar_evento(nombre_usuario, empresa, volver_func):
@@ -53,6 +55,23 @@ def abrir_cargar_evento(nombre_usuario, empresa, volver_func):
     def limpiar_info(_event=None):
         info_label.config(text="")
 
+
+    def actualizar_tipo_estacion(_event=None):
+        codigo = entry_estacion.get().strip()
+        if not codigo.isdigit():
+            return
+
+        tipo = obtener_tipo_estacion_por_codigo(empresa, int(codigo))
+        if tipo:
+            combo_tipo_estacion.set(tipo)
+            if tipo == "Cebadero Químico":
+                combo_tipo_evento['values'] = ["Mojado", "Picado", "Comido", "Faltante"]
+            elif tipo == "Planchas Pegamentosas":
+                combo_tipo_evento['values'] = ["Mojada", "Vencida", "Faltante", "Con captura"]
+            elif tipo == "Trampa Jaulas":
+                combo_tipo_evento['values'] = ["Captura", "No captura", "Reactivada"]
+
+
     ventana = tk.Tk()
     ventana.title("Cargar evento")
     ventana.geometry("600x450")
@@ -72,6 +91,7 @@ def abrir_cargar_evento(nombre_usuario, empresa, volver_func):
     # === Campos de entrada ===
     tk.Label(frame, text="Número de estación", bg="#FFCC00", font=("Arial", 10)).grid(row=1, column=0, sticky="e", padx=5, pady=5)
     entry_estacion = tk.Entry(frame, font=("Arial", 10))
+    entry_estacion.bind("<FocusOut>", actualizar_tipo_estacion)
     entry_estacion.grid(row=1, column=1, padx=5, pady=5)
 
     # Nuevo: Tipo de estación
@@ -81,7 +101,7 @@ def abrir_cargar_evento(nombre_usuario, empresa, volver_func):
 
     # Tipo de evento dinámico o fijo según lógica futura
     tk.Label(frame, text="Tipo de evento", bg="#FFCC00", font=("Arial", 10)).grid(row=3, column=0, sticky="e", padx=5, pady=5)
-    combo_tipo_evento = ttk.Combobox(frame, values=["Seco", "Húmedo", "Mojado"], state="readonly", font=("Arial", 10))
+    combo_tipo_evento = ttk.Combobox(frame, values=["Mojado", "Picado", "Faltante", "Vencida", "Faltante", "Con captura", "Sin captura"], state="readonly", font=("Arial", 10))
     combo_tipo_evento.grid(row=3, column=1, padx=5, pady=5)
 
     tk.Label(frame, text="Observación", bg="#FFCC00", font=("Arial", 10)).grid(row=4, column=0, sticky="e", padx=5, pady=5)
