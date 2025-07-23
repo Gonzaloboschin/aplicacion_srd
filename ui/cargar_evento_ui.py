@@ -62,15 +62,20 @@ def abrir_cargar_evento(nombre_usuario, empresa, volver_func):
             return
 
         tipo = obtener_tipo_estacion_por_codigo(empresa, int(codigo))
-        if tipo:
-            combo_tipo_estacion.set(tipo)
-            if tipo == "Cebadero Químico":
-                combo_tipo_evento['values'] = ["Mojado", "Picado", "Comido", "Faltante"]
-            elif tipo == "Planchas Pegamentosas":
-                combo_tipo_evento['values'] = ["Mojada", "Vencida", "Faltante", "Con captura"]
-            elif tipo == "Trampa Jaulas":
-                combo_tipo_evento['values'] = ["Captura", "No captura", "Reactivada"]
+        if not tipo:
+            messagebox.showerror("Código inválido", f"El código {codigo} no está definido para la empresa {empresa}.")
+            combo_tipo_estacion.set("")
+            combo_tipo_evento.set("")
+            return
 
+        combo_tipo_estacion.set(tipo)
+
+        if tipo == "Cebadero Químico":
+            combo_tipo_evento['values'] = ["Mojado", "Picado", "Comido", "Faltante"]
+        elif tipo == "Planchas Pegamentosas":
+            combo_tipo_evento['values'] = ["Mojada", "Vencida", "Faltante", "Con captura"]
+        elif tipo == "Trampa Jaulas":
+            combo_tipo_evento['values'] = ["Captura", "No captura", "Reactivada"]
 
     ventana = tk.Tk()
     ventana.title("Cargar evento")
