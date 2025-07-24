@@ -1,21 +1,29 @@
+# ui/revision_final_ui.py
+
 import tkinter as tk
 from tkinter import ttk, messagebox
 from utils.eventos_storage import cargar_eventos, limpiar_eventos
 from utils.excel_storage import export_revision, load_codes
+import datetime
+
+
+def centrar_ventana(ventana, ancho=800, alto=600):
+    ventana.update_idletasks()
+    x = (ventana.winfo_screenwidth() // 2) - (ancho // 2)
+    y = (ventana.winfo_screenheight() // 2) - (alto // 2)
+    ventana.geometry(f"{ancho}x{alto}+{x}+{y}")
+    ventana.resizable(False, False)
 
 
 def revision_final_operario(nombre_usuario, empresa, volver_func):
-    # 1. Cargar eventos modificados (temp storage)
     eventos_data = cargar_eventos()
 
-    # 2. Cargar catálogo estático de códigos para la empresa
     try:
         codes_df = load_codes(empresa)
     except Exception as e:
         messagebox.showerror("Error", f"No se pudo cargar códigos de la empresa: {e}")
         return
 
-    # 2.1 Asegurar que los nombres de columna coincidan con los esperados
     rename_map = {}
     if "Codigo" in codes_df.columns:
         rename_map["Codigo"] = "station_number"
@@ -24,7 +32,6 @@ def revision_final_operario(nombre_usuario, empresa, volver_func):
     if rename_map:
         codes_df = codes_df.rename(columns=rename_map)
 
-    # 3. Preparar lista completa con valores por defecto
     eventos_export = []
     for _, row in codes_df.iterrows():
         numero = str(row.get("station_number", ""))
@@ -36,26 +43,23 @@ def revision_final_operario(nombre_usuario, empresa, volver_func):
             "observacion": "Sin modificaciones"
         })
 
-    # 4. Aplicar modificaciones reales
     for mod in eventos_data:
         num_mod = str(mod.get("numero", ""))
         for evt in eventos_export:
             if evt["numero"] == num_mod:
-                # actualizar tipo_evento si existe
                 if mod.get("tipo_evento"):
-                    evt["tipo_evento"] = mod.get("tipo_evento")
+                    evt["tipo_evento"] = mod["tipo_evento"]
                 elif mod.get("evento"):
-                    evt["tipo_evento"] = mod.get("evento")
-                # actualizar observacion
+                    evt["tipo_evento"] = mod["evento"]
                 if mod.get("observacion"):
-                    evt["observacion"] = mod.get("observacion")
+                    evt["observacion"] = mod["observacion"]
                 break
 
-    # 5. Filtrar solo modificaciones para mostrar en la UI
-    eventos_modificados = []
-    for evt in eventos_export:
-        if evt["tipo_evento"] != "Normal" or evt["observacion"] != "Sin modificaciones":
-            eventos_modificados.append((evt["numero"], evt["tipo_estacion"], evt["tipo_evento"], evt["observacion"]))
+    eventos_modificados = [
+        (evt["numero"], evt["tipo_estacion"], evt["tipo_evento"], evt["observacion"])
+        for evt in eventos_export
+        if evt["tipo_evento"] != "Normal" or evt["observacion"] != "Sin modificaciones"
+    ]
 
     def modificar_celda(event):
         region = tree.identify("region", event.x, event.y)
@@ -80,14 +84,12 @@ def revision_final_operario(nombre_usuario, empresa, volver_func):
         entry.bind("<FocusOut>", lambda e: entry.destroy())
 
     def finalizar_revision():
-        # Exportar todo el catálogo con modificaciones
         try:
             path = export_revision(empresa, eventos_export)
             messagebox.showinfo("Exportado", f"Archivo guardado en:\n{path}")
         except Exception as e:
             messagebox.showerror("Error al exportar", str(e))
             return
-        # Limpiar temporal y cerrar
         limpiar_eventos()
         ventana.destroy()
         volver_func()
@@ -96,41 +98,47 @@ def revision_final_operario(nombre_usuario, empresa, volver_func):
         ventana.destroy()
         volver_func()
 
-    # --- Construcción de la UI ---
+    # === Ventana principal ===
     ventana = tk.Tk()
-    ventana.title("Revisión final de eventos")
-    ventana.geometry("800x450")
-    ventana.configure(bg="#FFCC00")
+    ventana.title("Revisión Final de Eventos")
+    centrar_ventana(ventana)
+    ventana.configure(bg="white")
 
-    # Encabezado
-    tk.Label(ventana, text=empresa.upper(), font=("Arial", 14, "bold"), bg="#FFCC00").place(x=30, y=20)
-    tk.Label(ventana, text=f"{nombre_usuario}\nOperador", font=("Arial", 10), bg="#FFCC00", justify="right").place(x=750, y=20)
+    # === Encabezado ===
+    header = tk.Frame(ventana, bg="#2e8b57", height=60)
+    header.pack(fill="x")
 
-    import datetime
-    fecha = datetime.date.today().strftime("%d/%m/%Y")
-    tk.Label(ventana, text=fecha, font=("Arial", 10), bg="#FFCC00").place(x=30, y=50)
+    tk.Label(header, text=f"{empresa.upper()} - {datetime.date.today().strftime('%d/%m/%Y')}",
+             bg="#2e8b57", fg="white", font=("Arial", 13, "bold")).pack(side="left", padx=20)
 
-    # Tabla con solo registros modificados
-    tree = ttk.Treeview(ventana, columns=("numero", "tipo_estacion", "tipo_evento", "observacion"), show="headings", height=8)
-    tree.heading("numero", text="Número de estación")
-    tree.heading("tipo_estacion", text="Tipo de estación")
-    tree.heading("tipo_evento", text="Tipo de evento")
-    tree.heading("observacion", text="Observación")
-    tree.column("numero", width=120)
-    tree.column("tipo_estacion", width=150)
-    tree.column("tipo_evento", width=150)
-    tree.column("observacion", width=280)
-    tree.place(relx=0.5, rely=0.58, anchor="center")
+    tk.Label(header, text=f"{nombre_usuario}\nOperador", bg="#2e8b57", fg="white",
+             font=("Arial", 10), justify="right").pack(side="right", padx=20)
+
+    # === Tabla ===
+    cuerpo = tk.Frame(ventana, bg="white")
+    cuerpo.pack(pady=20)
+
+    tree = ttk.Treeview(cuerpo, columns=("numero", "tipo_estacion", "tipo_evento", "observacion"),
+                        show="headings", height=12)
+    for col, ancho in zip(["numero", "tipo_estacion", "tipo_evento", "observacion"],
+                           [100, 180, 180, 300]):
+        tree.heading(col, text=col.replace("_", " ").capitalize())
+        tree.column(col, width=ancho)
 
     for fila in eventos_modificados:
         tree.insert("", "end", values=fila)
 
     tree.bind("<Double-1>", modificar_celda)
+    tree.pack()
 
-    # Botones
-    btn_frame = tk.Frame(ventana, bg="#FFCC00")
-    btn_frame.pack(side="bottom", pady=20)
-    tk.Button(btn_frame, text="Atrás", width=15, command=volver).grid(row=0, column=0, padx=10)
-    tk.Button(btn_frame, text="Finalizar", width=15, command=finalizar_revision).grid(row=0, column=1, padx=10)
+    # === Botones ===
+    btn_frame = tk.Frame(ventana, bg="white")
+    btn_frame.pack(pady=25)
+
+    tk.Button(btn_frame, text="Atrás", width=15, command=volver,
+              bg="#888888", fg="white", font=("Arial", 10)).grid(row=0, column=0, padx=15)
+
+    tk.Button(btn_frame, text="Finalizar", width=15, command=finalizar_revision,
+              bg="#2e8b57", fg="white", font=("Arial", 10)).grid(row=0, column=1, padx=15)
 
     ventana.mainloop()

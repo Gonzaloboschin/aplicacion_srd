@@ -1,13 +1,20 @@
-# ui/revision_final_ui.py
+# ui/menu_operario.py
 
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import messagebox
 from ui.cargar_evento_ui import abrir_cargar_evento
 from ui.revision_final_ui import revision_final_operario
 
 
-def menu_operario(nombre_usuario, empresa, volver_func):
+def centrar_ventana(ventana, ancho=800, alto=600):
+    ventana.update_idletasks()
+    x = (ventana.winfo_screenwidth() // 2) - (ancho // 2)
+    y = (ventana.winfo_screenheight() // 2) - (alto // 2)
+    ventana.geometry(f"{ancho}x{alto}+{x}+{y}")
+    ventana.resizable(False, False)
 
+
+def menu_operario(nombre_usuario, empresa, volver_func):
     def cargar_evento():
         ventana.destroy()
         abrir_cargar_evento(nombre_usuario, empresa, lambda: menu_operario(nombre_usuario, empresa, volver_func))
@@ -15,12 +22,10 @@ def menu_operario(nombre_usuario, empresa, volver_func):
     def modificar_evento():
         ventana.destroy()
         revision_final_operario(nombre_usuario, empresa, volver_func)
-        messagebox.showinfo("Modificar evento", "Abrir pantalla de modificación de evento")
 
     def eliminar_evento():
         ventana.destroy()
-        revision_final_operario(nombre_usuario, empresa, volver_func)        
-        messagebox.showinfo("Eliminar evento", "Abrir pantalla de eliminación de evento")
+        revision_final_operario(nombre_usuario, empresa, volver_func)
 
     def salir():
         messagebox.showinfo("Sesión finalizada", "La revisión fue completada. Volviendo al inicio.")
@@ -28,30 +33,38 @@ def menu_operario(nombre_usuario, empresa, volver_func):
         volver_func()
 
     ventana = tk.Tk()
-    ventana.title("Revisión final de eventos modificados")
-    ventana.geometry("500x400")
-    ventana.configure(bg="#FFCC00")
+    ventana.title("Menú del Operario")
+    centrar_ventana(ventana)
+    ventana.configure(bg="white")
 
-    label_usuario = tk.Label(ventana, text=f"{nombre_usuario}\nOperador", bg="#FFCC00", font=("Arial", 10), anchor="e", justify="right")
-    label_usuario.place(relx=0.98, rely=0.02, anchor="ne")
+    # === Encabezado ===
+    header = tk.Frame(ventana, bg="#2e8b57", height=60)
+    header.pack(fill="x")
 
-    label_empresa = tk.Label(ventana, text=empresa.upper(), font=("Arial", 12, "bold"), bg="#FFCC00")
-    label_empresa.place(relx=0.1, rely=0.25, anchor="w")
+    tk.Label(header, text=f"{empresa.upper()}", bg="#2e8b57", fg="white",
+             font=("Arial", 14, "bold")).pack(side="left", padx=20)
 
-    btn_cargar = tk.Button(ventana, text="Cargar evento", width=25, command=cargar_evento)
-    btn_cargar.place(relx=0.5, rely=0.4, anchor="center")
+    tk.Label(header, text=f"{nombre_usuario}\nOperador", bg="#2e8b57", fg="white",
+             font=("Arial", 10), justify="right").pack(side="right", padx=20)
 
-    btn_modificar = tk.Button(ventana, text="Modificar evento", width=25, command=modificar_evento)
-    btn_modificar.place(relx=0.5, rely=0.5, anchor="center")
+    # === Cuerpo ===
+    cuerpo = tk.Frame(ventana, bg="white")
+    cuerpo.pack(expand=True)
 
-    btn_eliminar = tk.Button(ventana, text="Eliminar evento", width=25, command=eliminar_evento)
-    btn_eliminar.place(relx=0.5, rely=0.6, anchor="center")
+    tk.Label(cuerpo, text="¿Qué desea hacer?", font=("Arial", 12), bg="white").pack(pady=(40, 20))
 
-    # Frame y botón salir
-    frame_botones = tk.Frame(ventana, bg="#FFCC00")
-    frame_botones.place(relx=0.5, rely=0.75, anchor="center")
+    botones = [
+        ("Cargar evento", cargar_evento),
+        ("Modificar evento", modificar_evento),
+        ("Eliminar evento", eliminar_evento)
+    ]
 
-    btn_salir = tk.Button(frame_botones, text="Salir", width=15, command=salir)
-    btn_salir.grid(row=0, column=0, padx=10)
+    for texto, comando in botones:
+        tk.Button(cuerpo, text=texto, width=25, font=("Arial", 11),
+                  command=comando, bg="#2e8b57", fg="white").pack(pady=10)
+
+    tk.Button(cuerpo, text="Salir", width=15, font=("Arial", 10),
+              command=salir, bg="#888888", fg="white").pack(pady=30)
 
     ventana.mainloop()
+
