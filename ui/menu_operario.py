@@ -15,17 +15,21 @@ def centrar_ventana(ventana, ancho=800, alto=600):
 
 
 def menu_operario(nombre_usuario, empresa, volver_func):
+    
     def cargar_evento():
         ventana.destroy()
         abrir_cargar_evento(nombre_usuario, empresa, lambda: menu_operario(nombre_usuario, empresa, volver_func))
 
     def modificar_evento():
         ventana.destroy()
-        revision_final_operario(nombre_usuario, empresa, volver_func)
+        revision_final_operario(nombre_usuario, empresa,
+                                lambda: menu_operario(nombre_usuario, empresa, volver_func))
 
     def eliminar_evento():
         ventana.destroy()
-        revision_final_operario(nombre_usuario, empresa, volver_func)
+        revision_final_operario(nombre_usuario, empresa,
+                                lambda: menu_operario(nombre_usuario, empresa, volver_func))
+
 
     def salir():
         messagebox.showinfo("Sesión finalizada", "La revisión fue completada. Volviendo al inicio.")
